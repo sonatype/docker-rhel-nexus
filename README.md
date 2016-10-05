@@ -1,27 +1,35 @@
-# sonatype/nexus3
+# sonatype/docker-rhel-nexus
 
-A Dockerfile for Sonatype Nexus Repository Manager 3, based on CentOS.
+Dockerfile for Sonatype Nexus Repository Manager 3 with OpenJDK and
+Red Hat Enterprise Linux 7. Made to run on the Red Hat OpenShift Container
+Platform.
 
-To run, binding the exposed port 8081 to the host.
+* [Docker](#docker)
+  * [Notes](#notes)
+  * [Persistent Data](#persistent-data)
+* [OpenShift](#openshift)
+  * [Building](#building)
+  * [Quickstart](#quickstart)
 
-```
-$ docker run -d -p 8081:8081 --name nexus sonatype/nexus3
-```
-
-To test:
-
-```
-$ curl -u admin:admin123 http://localhost:8081/service/metrics/ping
-```
+# Docker
 
 To (re)build the image:
-
-Copy the Dockerfile and do the build-
 
 ```
 $ docker build --rm=true --tag=sonatype/nexus3 .
 ```
 
+To run, binding the exposed port 8081 to the host:
+
+```
+$ docker run -d -p 8081:8081 --name nexus sonatype/nexus3
+```
+
+To confirm the Nexus server is running on port 8081:
+
+```
+$ curl -u admin:admin123 http://localhost:8081/service/metrics/ping
+```
 
 ## Notes
 
@@ -62,13 +70,13 @@ There are two general approaches to handling persistent storage requirements
 with Docker. See [Managing Data in Containers](https://docs.docker.com/userguide/dockervolumes/)
 for additional information.
 
-  1. *Use a data volume container*.  Since data volumes are persistent
-  until no containers use them, a container can created specifically for 
+  1. *Use a data volume*.  Since data volumes are persistent
+  until no containers use them, a volume can be created specifically for 
   this purpose.  This is the recommended approach.  
 
   ```
-  $ docker run -d --name nexus-data sonatype/nexus3 echo "data-only container for Nexus"
-  $ docker run -d -p 8081:8081 --name nexus --volumes-from nexus-data sonatype/nexus3
+  $ docker volume create --name nexus-data
+  $ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus3
   ```
 
   2. *Mount a host directory as the volume*.  This is not portable, as it
@@ -80,3 +88,30 @@ for additional information.
   $ mkdir /some/dir/nexus-data && chown -R 200 /some/dir/nexus-data
   $ docker run -d -p 8081:8081 --name nexus -v /some/dir/nexus-data:/nexus-data sonatype/nexus3
   ```
+
+# OpenShift
+
+## Building
+
+First login in to OpenShift and clone the project and OpenShift branch
+
+```
+git clone https://github.com/sonatype/docker-rhel-nexus.git
+```
+
+## Quickstart
+
+If you would like to run the init.sh script provided in the repository,
+it will create an OpenShift project named `nexus` within your OpenShift
+instance which has a pre-made template for Nexus 3.
+
+```
+cd docker-rhel-nexus/OpenShift/
+./init.sh
+```
+
+After using the init.sh script, browse to the OpenShift console and login.
+In the nexus project, click `Add to Project` and search for Nexus. Click
+create and configure to create a Nexus service. Wait until the service has
+been created and the deployment is successful. A Nexus instance should now
+be available on the configured service.
