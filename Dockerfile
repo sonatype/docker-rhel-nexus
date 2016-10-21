@@ -17,18 +17,18 @@ MAINTAINER Sonatype <cloud-ops@sonatype.com>
 
 # Atomic Labels
 LABEL name="Nexus Repository Manager" \
-  vendor="Sonatype" \
-  version="3.0.2-02" \
-  url="https://sonatype.com" \
-  summary="The Nexus Respoitory Manager server \
-      with universal support for popular component formats." \
-  run="docker run -d --name ${NAME} \
-      -p 8081:8081 \
-      ${IMAGE}" \
-  stop="docker stop ${NAME}"
+      vendor="Sonatype" \
+      version="3.0.2-02" \
+      url="https://sonatype.com" \
+      summary="The Nexus Repository Manager server \
+          with universal support for popular component formats." \
+      run="docker run -d --name ${NAME} \
+          -p 8081:8081 \
+          ${IMAGE}" \
+      stop="docker stop ${NAME}"
 
 # OpenShift Labels
-LABEL io.k8s.description="The Nexus Respoitory Manager server \
+LABEL io.k8s.description="The Nexus Repository Manager server \
           with universal support for popular component formats." \
       io.k8s.display-name="Nexus Repository Manager" \
       io.openshift.expose-services="8081:8081" \
