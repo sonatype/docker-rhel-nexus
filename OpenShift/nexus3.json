@@ -28,6 +28,9 @@
                {
                   "type": "ImageChange",
                   "imageChange": {}
+               },
+               {
+                  "type": "ConfigChange"
                }
             ],
             "source": {
@@ -144,13 +147,7 @@
                },
                "spec": {
                   "strategy": {
-                     "type": "Rolling",
-                     "rollingParams": {
-                        "updatePeriodSeconds": 1,
-                        "intervalSeconds": 1,
-                        "timeoutSeconds": 600
-                     },
-                     "post": {},
+                     "type": "Recreate",
                      "resources": {}
                   },
                   "triggers": [
@@ -166,6 +163,9 @@
                               "name": "${APPLICATION_NAME}:latest"
                            }
                         }
+                     },
+                     {
+                        "type": "ConfigChange"
                      }
                   ],
                   "replicas": 1,
