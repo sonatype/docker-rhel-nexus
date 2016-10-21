@@ -14,35 +14,54 @@
 
 FROM       registry.access.redhat.com/rhel7/rhel
 MAINTAINER Sonatype <cloud-ops@sonatype.com>
-LABEL vendor=Sonatype \
-  com.sonatype.license="Apache License, Version 2.0"
 
-ENV NEXUS_DATA /nexus-data
-ENV NEXUS_HOME /opt/sonatype/nexus
-ENV NEXUS_VERSION 3.0.2-02
+# Atomic Labels
+LABEL name="Nexus Repository Manager" \
+  vendor="Sonatype" \
+  version="3.0.2-02" \
+  url="https://sonatype.com" \
+  summary="The Nexus Respoitory Manager server \
+      with universal support for popular component formats." \
+  run="docker run -d --name ${NAME} \
+      -p 8081:8081 \
+      ${IMAGE}" \
+  stop="docker stop ${NAME}"
 
-ENV JAVA_VERSION_MAJOR 8
-ENV JAVA_VERSION_MINOR 102
-ENV JAVA_VERSION_BUILD 14
+# OpenShift Labels
+LABEL io.k8s.description="The Nexus Respoitory Manager server \
+          with universal support for popular component formats." \
+      io.k8s.display-name="Nexus Repository Manager" \
+      io.openshift.expose-services="8081:8081" \
+      io.openshift.tags="Sonatype,Nexus"
 
-# Download Oracle JRE and localinstall with yum, yum install tar, yum clean
-RUN curl --remote-name --fail --silent --location --retry 3 \
-  --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
-  http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm \
-  && yum localinstall -y jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm \
-  && rm jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm \
-  && yum install -y tar  \
-  && yum clean all
 
-# install nexus
-RUN mkdir -p ${NEXUS_HOME} \
-  && curl --fail --silent --location --retry 3 \
-    https://download.sonatype.com/nexus/3/nexus-${NEXUS_VERSION}-unix.tar.gz \
-  | gunzip \
-  | tar x -C ${NEXUS_HOME} --strip-components=1 nexus-${NEXUS_VERSION} \
-  && chown -R root:root ${NEXUS_HOME}
+# Sonatype Labels
+LABEL com.sonatype.license="Apache License, Version 2.0"
 
-## configure nexus runtime env
+# Install Runtime Environment
+RUN set -x && \
+    yum clean all && \
+    yum-config-manager --disable \* && \
+    yum-config-manager --enable rhel-7-server-rpms && \
+    yum-config-manager --enable rhel-7-server-thirdparty-oracle-java-rpms && \
+    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
+    yum -y install --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
+    yum clean all
+
+ENV NEXUS_DATA=/nexus-data \
+    NEXUS_HOME=/opt/sonatype/nexus \
+    NEXUS_VERSION=3.0.2-02 \
+    USER_NAME=nexus \
+    USER_UID=200
+
+# Install Nexus
+RUN mkdir -p ${NEXUS_HOME} && \
+    curl --fail --silent --location --retry 3 \
+      https://download.sonatype.com/nexus/3/nexus-${NEXUS_VERSION}-unix.tar.gz \
+      | gunzip \
+      | tar x -C ${NEXUS_HOME} --strip-components=1 nexus-${NEXUS_VERSION}
+
+# Configure Nexus Runtime Environment
 RUN sed \
     -e "s|karaf.home=.|karaf.home=${NEXUS_HOME}|g" \
     -e "s|karaf.base=.|karaf.base=${NEXUS_HOME}|g" \
@@ -52,21 +71,17 @@ RUN sed \
     -e "s|java.io.tmpdir=data/tmp|java.io.tmpdir=${NEXUS_DATA}/tmp|g" \
     -i ${NEXUS_HOME}/bin/nexus.vmoptions
 
-RUN useradd -r -u 200 -m -c "nexus role account" -d ${NEXUS_DATA} -s /bin/false nexus
-
-COPY scripts/fix-permissions.sh /usr/local/bin/
-
-RUN chmod 755 /usr/local/bin/fix-permissions.sh \
-  && /usr/local/bin/fix-permissions.sh /opt/sonatype
+RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
+            -c "${USER_NAME} application user" ${USER_NAME}
 
 VOLUME ${NEXUS_DATA}
 
-USER nexus
-WORKDIR $NEXUS_HOME
+USER ${USER_NAME}
+WORKDIR ${NEXUS_HOME}
 
-ENV JAVA_MAX_MEM 1200m
-ENV JAVA_MIN_MEM 1200m
+ENV JAVA_MAX_MEM=1200m \
+    JAVA_MIN_MEM=1200m
 
 EXPOSE 8081
 
-CMD bin/nexus run
+CMD ["bin/nexus", "run"]
