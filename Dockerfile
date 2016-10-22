@@ -74,6 +74,14 @@ RUN sed \
 RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
             -c "${USER_NAME} application user" ${USER_NAME}
 
+COPY scripts/ /usr/local/bin/
+
+RUN chmod 775 /usr/local/bin/fix-permissions && \
+    /usr/local/bin/fix-permissions ${NEXUS_HOME} && \
+    /usr/local/bin/fix-permissions ${NEXUS_DATA} && \
+    chown -R ${USER_NAME}:0 ${NEXUS_HOME} && \
+    chown -R ${USER_NAME}:0 ${NEXUS_DATA}
+
 VOLUME ${NEXUS_DATA}
 
 USER ${USER_NAME}
