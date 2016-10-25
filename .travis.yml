@@ -1,0 +1,14 @@
+sudo: required
+services:
+ - docker
+addons:
+  apt:
+    packages:
+    - nodejs
+    - npm
+install:
+  - npm install -g dockerfile_lint
+before_script:
+  - dockerfile_lint -f Dockerfile
+script:
+  - docker build --rm=true --tag=sonatype/nexus3 .
