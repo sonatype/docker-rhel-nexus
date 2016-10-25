@@ -1,25 +1,8 @@
-#!/bin/bash
+#!/bin/sh
+# Fix permissions on the given directory to allow group read/write of
+# regular files and execute of directories.
+# https://github.com/sclorg/s2i-base-container/blob/master/bin/fix-permissions
 
-[ -z $1 ] && echo "You must specify path for fixing permissions" && exit 1
-
-# Fixes permissions in folders
-for i in `find $1 -type d`
-do
-  [ -r $i ] && chmod go+r $i
-  [ -w $i ] && chmod go+w $i
-  [ -x $i ] && chmod go+x $i
-done
-
-# Goes up directories to root
-f=$1
-while [[ $f != "/" ]]; do chmod go+wx $f; f=$(dirname $f); done;
-
-# Fixes permissions in files
-for i in `find $1 -type f`
-do
-  [ -r $i ] && chmod go+r $i
-  [ -w $i ] && chmod go+w $i
-  [ -x $i ] && chmod go+x $i
-done  
-
-exit 0
+find $1 -exec chgrp 0 {} \;
+find $1 -exec chmod g+rw {} \;
+find $1 -type d -exec chmod g+x {} +

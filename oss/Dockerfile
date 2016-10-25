@@ -12,64 +12,84 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM registry.access.redhat.com/rhel7/rhel
+FROM       registry.access.redhat.com/rhel7/rhel
 MAINTAINER Sonatype <cloud-ops@sonatype.com>
-LABEL vendor=Sonatype \
-  com.sonatype.license="Apache License, Version 2.0"
 
-ENV NEXUS_VERSION 2.14.0-01
-ENV NEXUS_HOME /opt/nexus/nexus
-ENV NEXUS_WORK /sonatype-work
-ENV NEXUS_REPOS /repositories
-ENV APPLICATION_CONF /conf
+# Atomic Labels
+LABEL name="Nexus 2 OSS" \
+      vendor="Sonatype" \
+      version="2.14.0-01" \
+      url="https://sonatype.com" \
+      summary="The Nexus Repository Manager server \
+          with universal support for popular component formats." \
+      run="docker run -d --name ${NAME} \
+          -p 8081:8081 \
+          ${IMAGE}" \
+      stop="docker stop ${NAME}"
 
-ENV JAVA_VERSION_MAJOR 8
-ENV JAVA_VERSION_MINOR 102
-ENV JAVA_VERSION_BUILD 14
+# OpenShift Labels
+LABEL io.k8s.description="The Nexus Repository Manager server \
+          with universal support for popular component formats." \
+      io.k8s.display-name="Nexus 2 OSS" \
+      io.openshift.expose-services="8081:8081" \
+      io.openshift.tags="Sonatype,Nexus"
 
-# Download Oracle JRE and localinstall with yum, yum install tar, yum clean
-RUN curl --remote-name --fail --silent --location --retry 3 \
-  --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
-  http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm \
-  && yum localinstall -y jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm \
-  && rm jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm \
-  && yum install -y tar  \
-  && yum clean all
 
-RUN mkdir -p ${NEXUS_HOME} \
-  && curl --fail --silent --location --retry 3 \
-    https://download.sonatype.com/nexus/oss/nexus-${NEXUS_VERSION}-bundle.tar.gz \
-  | gunzip \
-  | tar x -C /tmp nexus-${NEXUS_VERSION} \
-  && mv /tmp/nexus-${NEXUS_VERSION}/* ${NEXUS_HOME}/ \
-  && rm -rf /tmp/nexus-${NEXUS_VERSION} \
-  && chmod 777 $NEXUS_HOME \
-  && mkdir -p $NEXUS_WORK && chmod -R 777 $NEXUS_WORK \
-  && mkdir -p $NEXUS_REPOS && chmod -R 777 $NEXUS_REPOS \
-  && mkdir -p $APPLICATION_CONF && chmod -R 777 $APPLICATION_CONF
+# Sonatype Labels
+LABEL com.sonatype.license="Apache License, Version 2.0"
 
-RUN useradd -r -u 200 -m -c "nexus role account" -d ${NEXUS_WORK} -s /bin/false nexus
+# Install Runtime Environment
+RUN set -x && \
+    yum clean all && \
+    yum-config-manager --disable \* && \
+    yum-config-manager --enable rhel-7-server-rpms && \
+    yum-config-manager --enable rhel-7-server-thirdparty-oracle-java-rpms && \
+    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
+    yum -y install --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
+    yum clean all
+
+ENV NEXUS_HOME=/opt/sonatype/nexus \
+    NEXUS_WORK=/sonatype-work \
+    NEXUS_REPOS=/repositories \
+    NEXUS_VERSION=2.14.0-01 \
+    APPLICATION_CONF=/conf \
+    USER_NAME=nexus \
+    USER_UID=200
+
+RUN mkdir -p ${NEXUS_HOME} && \
+    curl --fail --silent --location --retry 3 \
+      https://download.sonatype.com/nexus/oss/nexus-${NEXUS_VERSION}-bundle.tar.gz \
+      | gunzip \
+      | tar x -C /tmp nexus-${NEXUS_VERSION} && \
+    mv /tmp/nexus-${NEXUS_VERSION}/* ${NEXUS_HOME}/ && \
+    rm -rf /tmp/nexus-${NEXUS_VERSION} && \
+    mkdir -p ${NEXUS_REPOS} && \
+    mkdir -p ${APPLICATION_CONF}
+
+RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_WORK} -s /sbin/no-login \
+            -c "${USER_NAME} application user" ${USER_NAME}
 
 COPY scripts/fix-permissions.sh /usr/local/bin/
 
-RUN chmod 755 /usr/local/bin/fix-permissions.sh \
-  && /usr/local/bin/fix-permissions.sh /opt/nexus \
-  && /usr/local/bin/fix-permissions.sh $NEXUS_WORK \
-  && /usr/local/bin/fix-permissions.sh $NEXUS_REPOS \
-  && /usr/local/bin/fix-permissions.sh $NEXUS_HOME/conf \
-  && /usr/local/bin/fix-permissions.sh $APPLICATION_CONF
+RUN chmod 755 /usr/local/bin/fix-permissions.sh && \
+    /usr/local/bin/fix-permissions.sh ${NEXUS_WORK} && \
+    /usr/local/bin/fix-permissions.sh ${NEXUS_REPOS} && \
+    /usr/local/bin/fix-permissions.sh ${APPLICATION_CONF} && \
+    chown -R ${USER_NAME}:0 ${NEXUS_WORK} && \
+    chown -R ${USER_NAME}:0 ${NEXUS_REPOS} && \
+    chown -R ${USER_NAME}:0 ${APPLICATION_CONF}
 
-VOLUME ["/sonatype-work"]
-VOLUME ["/repositories"]
+VOLUME ${NEXUS_WORK}
+VOLUME ${NEXUS_REPOS}
 
-USER nexus
+USER ${USER_NAME}
+WORKDIR ${NEXUS_HOME}
 
-WORKDIR $NEXUS_HOME
-ENV CONTEXT_PATH /
-ENV MAX_HEAP 768m
-ENV MIN_HEAP 256m
-ENV JAVA_OPTS -server -XX:MaxPermSize=192m -Djava.net.preferIPv4Stack=true
-ENV LAUNCHER_CONF ${NEXUS_HOME}/conf/jetty.xml ${NEXUS_HOME}/conf/jetty-requestlog.xml
+ENV CONTEXT_PATH=/ \
+    MAX_HEAP=768m \
+    MIN_HEAP=256m \
+    JAVA_OPTS="-server -XX:MaxPermSize=192m -Djava.net.preferIPv4Stack=true" \
+    LAUNCHER_CONF="${NEXUS_HOME}/conf/jetty.xml ${NEXUS_HOME}/conf/jetty-requestlog.xml"
 
 EXPOSE 8081
 
