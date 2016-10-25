@@ -1,0 +1,16 @@
+sudo: required
+services:
+ - docker
+addons:
+  apt:
+    packages:
+    - nodejs
+    - npm
+install:
+  - npm install -g dockerfile_lint
+before_script:
+  - dockerfile_lint -f oss/Dockerfile
+  - dockerfile_lint -f pro/Dockerfile
+script:
+  - docker build --rm --tag sonatype/nexus-oss oss/
+  - docker build --rm --tag sonatype/nexus-pro pro/

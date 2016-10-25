@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM       registry.access.redhat.com/rhel7/rhel
+FROM       centos:centos7
 MAINTAINER Sonatype <cloud-ops@sonatype.com>
 
 # Atomic Labels
@@ -34,20 +34,24 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
       io.openshift.expose-services="8081:8081" \
       io.openshift.tags="Sonatype,Nexus"
 
-
 # Sonatype Labels
 LABEL com.sonatype.license="Apache License, Version 2.0"
 
 # Install Runtime Environment
-RUN set -x && \
-    yum clean all && \
-    yum-config-manager --disable \* && \
-    yum-config-manager --enable rhel-7-server-rpms && \
-    yum-config-manager --enable rhel-7-server-thirdparty-oracle-java-rpms && \
-    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
-    yum -y install --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
-    yum clean all
+ENV JAVA_VERSION_MAJOR=8 \
+    JAVA_VERSION_MINOR=102 \
+    JAVA_VERSION_BUILD=14
 
+RUN yum install -y --setopt=tsflags=nodocs curl tar && \
+    yum clean all && \
+    curl --remote-name --fail --silent --location --retry 3 \
+        --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
+        http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
+    yum localinstall -y jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
+    yum clean all && \
+    rm jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm
+
+# Install Nexus
 ENV NEXUS_HOME=/opt/sonatype/nexus \
     NEXUS_WORK=/sonatype-work \
     NEXUS_REPOS=/repositories \
@@ -71,7 +75,7 @@ RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_WORK} -s /sbin/no-login \
 
 COPY scripts/fix-permissions.sh /usr/local/bin/
 
-RUN chmod 755 /usr/local/bin/fix-permissions.sh && \
+RUN chmod 755 /usr/local/bin/fix-permissions.sh && sync && \
     /usr/local/bin/fix-permissions.sh ${NEXUS_WORK} && \
     /usr/local/bin/fix-permissions.sh ${NEXUS_REPOS} && \
     /usr/local/bin/fix-permissions.sh ${APPLICATION_CONF} && \
@@ -82,8 +86,10 @@ RUN chmod 755 /usr/local/bin/fix-permissions.sh && \
 VOLUME ${NEXUS_WORK}
 VOLUME ${NEXUS_REPOS}
 
-USER ${USER_NAME}
-WORKDIR ${NEXUS_HOME}
+# Supply non variable to USER command ${USER_NAME}
+USER nexus
+# Supply non variable to WORKDIR command ${NEXUS_HOME}
+WORKDIR /opt/sonatype/nexus
 
 ENV CONTEXT_PATH=/ \
     MAX_HEAP=768m \
