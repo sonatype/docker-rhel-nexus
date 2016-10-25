@@ -75,7 +75,7 @@ RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_WORK} -s /sbin/no-login \
 
 COPY scripts/fix-permissions.sh /usr/local/bin/
 
-RUN chmod 755 /usr/local/bin/fix-permissions.sh && \
+RUN chmod 755 /usr/local/bin/fix-permissions.sh && sync && \
     /usr/local/bin/fix-permissions.sh ${NEXUS_WORK} && \
     /usr/local/bin/fix-permissions.sh ${NEXUS_REPOS} && \
     /usr/local/bin/fix-permissions.sh ${APPLICATION_CONF} && \
