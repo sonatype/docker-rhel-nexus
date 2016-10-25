@@ -76,8 +76,10 @@ RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
 
 VOLUME ${NEXUS_DATA}
 
-USER ${USER_NAME}
-WORKDIR ${NEXUS_HOME}
+# Supply non variable to USER command ${USER_NAME}
+USER nexus
+# Supply non variable to WORKDIR command ${NEXUS_HOME}
+WORKDIR /opt/sonatype/nexus
 
 ENV JAVA_MAX_MEM=1200m \
     JAVA_MIN_MEM=1200m
