@@ -51,6 +51,9 @@ ENV NEXUS_DATA=/nexus-data \
 # Supply non variable to USER command ${USER_NAME}
 USER nexus
 
+RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
+            -c "${USER_NAME} application user" ${USER_NAME}
+
 RUN mkdir -p ${NEXUS_HOME} && \
     curl --fail --silent --location --retry 3 \
       https://download.sonatype.com/nexus/3/nexus-${NEXUS_VERSION}-unix.tar.gz \
@@ -66,9 +69,6 @@ RUN sed \
     -e "s|karaf.data=data|karaf.data=${NEXUS_DATA}|g" \
     -e "s|java.io.tmpdir=data/tmp|java.io.tmpdir=${NEXUS_DATA}/tmp|g" \
     -i ${NEXUS_HOME}/bin/nexus.vmoptions
-
-RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
-            -c "${USER_NAME} application user" ${USER_NAME}
 
 VOLUME ${NEXUS_DATA}
 
