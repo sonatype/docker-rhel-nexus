@@ -38,7 +38,7 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
 LABEL com.sonatype.license="Apache License, Version 2.0"
 
 # Install Runtime Environment
-RUN yum install -y --setopt=tsflags=nodocs tar java-1.8.0-openjdk-devel && \
+RUN yum install -y --setopt=tsflags=nodocs tar java-1.8.0-openjdk-devel net-tools && \
     yum clean all 
 
 # Install Nexus
