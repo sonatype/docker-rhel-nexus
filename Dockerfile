@@ -39,7 +39,7 @@ LABEL com.sonatype.license="Apache License, Version 2.0"
 
 # Install Runtime Environment
 RUN yum install -y --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
-    yum clean all && 
+    yum clean all 
 
 # Install Nexus
 ENV NEXUS_DATA=/nexus-data \
