@@ -48,11 +48,11 @@ ENV NEXUS_DATA=/nexus-data \
     USER_NAME=nexus \
     USER_UID=200
 
-# Supply non variable to USER command ${USER_NAME}
-USER nexus
-
 RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
             -c "${USER_NAME} application user" ${USER_NAME}
+
+# Supply non variable to USER command ${USER_NAME}
+USER nexus
 
 RUN mkdir -p ${NEXUS_HOME} && \
     curl --fail --silent --location --retry 3 \
