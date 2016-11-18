@@ -38,18 +38,8 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
 LABEL com.sonatype.license="Apache License, Version 2.0"
 
 # Install Runtime Environment
-ENV JAVA_VERSION_MAJOR=8 \
-    JAVA_VERSION_MINOR=102 \
-    JAVA_VERSION_BUILD=14
-
-RUN yum install -y --setopt=tsflags=nodocs curl tar && \
-    yum clean all && \
-    curl --remote-name --fail --silent --location --retry 3 \
-        --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
-        http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
-    yum localinstall -y jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
-    yum clean all && \
-    rm jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm
+RUN yum install -y --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
+    yum clean all && 
 
 # Install Nexus
 ENV NEXUS_DATA=/nexus-data \
