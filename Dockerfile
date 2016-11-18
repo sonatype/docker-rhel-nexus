@@ -38,18 +38,8 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
 LABEL com.sonatype.license="Apache License, Version 2.0"
 
 # Install Runtime Environment
-ENV JAVA_VERSION_MAJOR=8 \
-    JAVA_VERSION_MINOR=102 \
-    JAVA_VERSION_BUILD=14
-
-RUN yum install -y --setopt=tsflags=nodocs curl tar && \
-    yum clean all && \
-    curl --remote-name --fail --silent --location --retry 3 \
-        --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
-        http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
-    yum localinstall -y jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
-    yum clean all && \
-    rm jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm
+RUN yum install -y --setopt=tsflags=nodocs tar java-1.8.0-openjdk-devel net-tools && \
+    yum clean all 
 
 # Install Nexus
 ENV NEXUS_DATA=/nexus-data \
@@ -58,8 +48,15 @@ ENV NEXUS_DATA=/nexus-data \
     USER_NAME=nexus \
     USER_UID=200
 
-RUN mkdir -p ${NEXUS_HOME} && \
-    curl --fail --silent --location --retry 3 \
+RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
+            -c "${USER_NAME} application user" ${USER_NAME} && \
+    mkdir -p ${NEXUS_HOME} && \
+    chown ${USER_NAME} ${NEXUS_HOME}
+
+# Supply non variable to USER command ${USER_NAME}
+USER ${USER_NAME}
+
+RUN curl --fail --silent --location --retry 3 \
       https://download.sonatype.com/nexus/3/nexus-${NEXUS_VERSION}-unix.tar.gz \
       | gunzip \
       | tar x -C ${NEXUS_HOME} --strip-components=1 nexus-${NEXUS_VERSION}
@@ -74,13 +71,8 @@ RUN sed \
     -e "s|java.io.tmpdir=data/tmp|java.io.tmpdir=${NEXUS_DATA}/tmp|g" \
     -i ${NEXUS_HOME}/bin/nexus.vmoptions
 
-RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
-            -c "${USER_NAME} application user" ${USER_NAME}
-
 VOLUME ${NEXUS_DATA}
 
-# Supply non variable to USER command ${USER_NAME}
-USER nexus
 # Supply non variable to WORKDIR command ${NEXUS_HOME}
 WORKDIR /opt/sonatype/nexus
 

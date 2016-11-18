@@ -43,6 +43,7 @@
             "strategy": {
                "type": "Docker",
                "dockerStrategy": {
+                  "dockerfilePath": "Dockerfile.rhel7",
                   "from": {
                      "kind": "DockerImage",
                      "name": "registry.access.redhat.com/rhel7/rhel"
