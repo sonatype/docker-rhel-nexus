@@ -49,13 +49,14 @@ ENV NEXUS_DATA=/nexus-data \
     USER_UID=200
 
 RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
-            -c "${USER_NAME} application user" ${USER_NAME}
+            -c "${USER_NAME} application user" ${USER_NAME} && \
+    mkdir -p ${NEXUS_HOME} && \
+    chown ${USER_NAME} ${NEXUS_HOME}
 
 # Supply non variable to USER command ${USER_NAME}
-USER nexus
+USER ${USER_NAME}
 
-RUN mkdir -p ${NEXUS_HOME} && \
-    curl --fail --silent --location --retry 3 \
+RUN curl --fail --silent --location --retry 3 \
       https://download.sonatype.com/nexus/3/nexus-${NEXUS_VERSION}-unix.tar.gz \
       | gunzip \
       | tar x -C ${NEXUS_HOME} --strip-components=1 nexus-${NEXUS_VERSION}
