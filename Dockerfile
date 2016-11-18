@@ -48,6 +48,9 @@ ENV NEXUS_DATA=/nexus-data \
     USER_NAME=nexus \
     USER_UID=200
 
+# Supply non variable to USER command ${USER_NAME}
+USER nexus
+
 RUN mkdir -p ${NEXUS_HOME} && \
     curl --fail --silent --location --retry 3 \
       https://download.sonatype.com/nexus/3/nexus-${NEXUS_VERSION}-unix.tar.gz \
@@ -69,8 +72,6 @@ RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
 
 VOLUME ${NEXUS_DATA}
 
-# Supply non variable to USER command ${USER_NAME}
-USER nexus
 # Supply non variable to WORKDIR command ${NEXUS_HOME}
 WORKDIR /opt/sonatype/nexus
 
