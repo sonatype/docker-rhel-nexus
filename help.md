@@ -61,9 +61,13 @@ That atomic command runs the docker command set in this label:
 
 `Name=`
 
-The registry location and name of the image. For example, Name="nexus".
+The registry location and name of the image. For example, Name="Nexus Repository Manager".
 
 `Version=`
+
+The Red Hat Enterprise Linux version from which the container was built. For example, "Version="7.2".
+
+`Release=`
 
 The Nexus Repository Manager version from which the container was built. For example, Version="3.0.2-02".
 
