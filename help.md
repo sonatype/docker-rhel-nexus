@@ -21,6 +21,8 @@ Stops the installed container
 
 The container itself consists of:
     - Linux base image
+    - Oracle Java JDK
+    - Nexus Repository Manager
     - Atomic help file
 
 Files added to the container during docker build include: /help.1.
