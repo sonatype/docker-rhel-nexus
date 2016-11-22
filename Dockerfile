@@ -42,6 +42,8 @@ ENV JAVA_VERSION_MAJOR=8 \
     JAVA_VERSION_MINOR=102 \
     JAVA_VERSION_BUILD=14
 
+COPY help.rhel7.md /help.md
+
 RUN yum install -y --setopt=tsflags=nodocs curl tar && \
     yum clean all && \
     curl --remote-name --fail --silent --location --retry 3 \
