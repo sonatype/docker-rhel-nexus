@@ -24,7 +24,7 @@ Stops the installed container
 Removes the installed container, not the image
 
 The container itself consists of:
-    - Centos 7 base image 
+    - Linux base image 
     - Atomic help file
 
 Files added to the container during docker build include: /help.1.
