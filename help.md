@@ -19,12 +19,8 @@ Starts the installed container with selected privileges to the host.
 
 Stops the installed container
 
-`uninstall`
-
-Removes the installed container, not the image
-
 The container itself consists of:
-    - Linux base image 
+    - Linux base image
     - Atomic help file
 
 Files added to the container during docker build include: /help.1.
@@ -39,10 +35,6 @@ To run the nexus container:
 To stop the nexus container (after it is installed), run:
 
   atomic stop nexus
-
-To remove the nexus container (not the image) from your system, run:
-
-  atomic uninstall nexus
 
 # LABELS
 The nexus container includes the following LABEL settings:
