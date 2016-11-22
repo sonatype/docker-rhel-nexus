@@ -37,6 +37,8 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
 # Sonatype Labels
 LABEL com.sonatype.license="Apache License, Version 2.0"
 
+COPY help.md /
+
 # Install Runtime Environment
 RUN set -x && \
     yum clean all && \
@@ -45,6 +47,10 @@ RUN set -x && \
     yum-config-manager --enable rhel-7-server-thirdparty-oracle-java-rpms && \
     yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
     yum -y install --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
+    yum-config-manager --enable rhel-7-server-optional-rpms && \
+    ### help markdown to man conversion
+    yum -y install golang-github-cpuguy83-go-md2man && go-md2man -in help.md -out help.1 && \
+    yum -y remove golang-github-cpuguy83-go-md2man && rm -f help.md && \
     yum clean all
 
 # Install Nexus

@@ -42,12 +42,17 @@ ENV JAVA_VERSION_MAJOR=8 \
     JAVA_VERSION_MINOR=102 \
     JAVA_VERSION_BUILD=14
 
+COPY help.md /help.md
+
 RUN yum install -y --setopt=tsflags=nodocs curl tar && \
     yum clean all && \
     curl --remote-name --fail --silent --location --retry 3 \
         --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
         http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
     yum localinstall -y jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
+    ### help markdown to man conversion
+    yum -y install golang-github-cpuguy83-go-md2man && go-md2man -in help.md -out help.1 && \
+    yum -y remove golang-github-cpuguy83-go-md2man && rm -f help.md && \
     yum clean all && \
     rm jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm
 
