@@ -37,7 +37,7 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
 # Sonatype Labels
 LABEL com.sonatype.license="Apache License, Version 2.0"
 
-COPY help.md /
+COPY help.rhel7.md /help.md
 
 # Install Runtime Environment
 RUN set -x && \
