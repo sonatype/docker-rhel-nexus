@@ -22,10 +22,10 @@ LABEL name="Nexus Repository Manager" \
       url="https://sonatype.com" \
       summary="The Nexus Repository Manager server \
           with universal support for popular component formats." \
-      run="docker run -d --name ${NAME} \
+      run="docker run -d --name NAME \
           -p 8081:8081 \
-          ${IMAGE}" \
-      stop="docker stop ${NAME}"
+          IMAGE" \
+      stop="docker stop NAME"
 
 # OpenShift Labels
 LABEL io.k8s.description="The Nexus Repository Manager server \
