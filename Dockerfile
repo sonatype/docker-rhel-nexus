@@ -63,8 +63,15 @@ ENV NEXUS_DATA=/nexus-data \
     USER_NAME=nexus \
     USER_UID=200
 
-RUN mkdir -p ${NEXUS_HOME} && \
-    curl --fail --silent --location --retry 3 \
+RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
+            -c "${USER_NAME} application user" ${USER_NAME} && \
+    mkdir -p ${NEXUS_HOME} && \
+    chown ${USER_NAME} ${NEXUS_HOME}
+
+# Supply non variable to USER command ${USER_NAME}
+USER ${USER_NAME}
+
+RUN curl --fail --silent --location --retry 3 \
       https://download.sonatype.com/nexus/3/nexus-${NEXUS_VERSION}-unix.tar.gz \
       | gunzip \
       | tar x -C ${NEXUS_HOME} --strip-components=1 nexus-${NEXUS_VERSION}
@@ -79,13 +86,8 @@ RUN sed \
     -e "s|java.io.tmpdir=data/tmp|java.io.tmpdir=${NEXUS_DATA}/tmp|g" \
     -i ${NEXUS_HOME}/bin/nexus.vmoptions
 
-RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
-            -c "${USER_NAME} application user" ${USER_NAME}
-
 VOLUME ${NEXUS_DATA}
 
-# Supply non variable to USER command ${USER_NAME}
-USER nexus
 # Supply non variable to WORKDIR command ${NEXUS_HOME}
 WORKDIR /opt/sonatype/nexus
 
