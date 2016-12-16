@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM       centos:centos7
+FROM       registry.access.redhat.com/rhel7/rhel
 MAINTAINER Sonatype <cloud-ops@sonatype.com>
 
 # Atomic Labels
@@ -37,24 +37,21 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
 # Sonatype Labels
 LABEL com.sonatype.license="Apache License, Version 2.0"
 
+COPY help.md /
+
 # Install Runtime Environment
-ENV JAVA_VERSION_MAJOR=8 \
-    JAVA_VERSION_MINOR=102 \
-    JAVA_VERSION_BUILD=14
-
-COPY help.md /help.md
-
-RUN yum install -y --setopt=tsflags=nodocs curl tar && \
+RUN set -x && \
     yum clean all && \
-    curl --remote-name --fail --silent --location --retry 3 \
-        --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
-        http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
-    yum localinstall -y jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
+    yum-config-manager --disable \* && \
+    yum-config-manager --enable rhel-7-server-rpms && \
+    yum-config-manager --enable rhel-7-server-thirdparty-oracle-java-rpms && \
+    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
+    yum -y install --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
+    yum-config-manager --enable rhel-7-server-optional-rpms && \
     ### help markdown to man conversion
     yum -y install golang-github-cpuguy83-go-md2man && go-md2man -in help.md -out help.1 && \
     yum -y remove golang-github-cpuguy83-go-md2man && rm -f help.md && \
-    yum clean all && \
-    rm jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm
+    yum clean all
 
 # Install Nexus
 ENV NEXUS_DATA=/nexus-data \
