@@ -56,7 +56,7 @@ RUN set -x && \
 # Install Nexus
 ENV NEXUS_DATA=/nexus-data \
     NEXUS_HOME=/opt/sonatype/nexus \
-    NEXUS_VERSION=3.0.2-02 \
+    NEXUS_VERSION=3.1.0-04 \
     USER_NAME=nexus \
     USER_UID=200
 
