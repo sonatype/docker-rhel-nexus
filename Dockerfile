@@ -18,7 +18,7 @@ MAINTAINER Sonatype <cloud-ops@sonatype.com>
 # Atomic Labels
 LABEL name="Nexus Repository Manager" \
       vendor="Sonatype" \
-      version="3.0.2-02" \
+      version="3.2.0-01" \
       url="https://sonatype.com" \
       summary="The Nexus Repository Manager server \
           with universal support for popular component formats." \
@@ -49,14 +49,15 @@ RUN set -x && \
     yum -y install --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
     yum-config-manager --enable rhel-7-server-optional-rpms && \
     ### help markdown to man conversion
-    yum -y install golang-github-cpuguy83-go-md2man && go-md2man -in help.md -out help.1 && \
-    yum -y remove golang-github-cpuguy83-go-md2man && rm -f help.md && \
+    ###  these are breaking the build on RHEL and I need to work on the demo env - cmy
+#    yum -y install golang-github-cpuguy83-go-md2man && go-md2man -in help.md -out help.1 && \
+#    yum -y remove golang-github-cpuguy83-go-md2man && rm -f help.md && \
     yum clean all
 
 # Install Nexus
 ENV NEXUS_DATA=/nexus-data \
     NEXUS_HOME=/opt/sonatype/nexus \
-    NEXUS_VERSION=3.1.0-04 \
+    NEXUS_VERSION=3.2.0-01 \
     USER_NAME=nexus \
     USER_UID=200
 
