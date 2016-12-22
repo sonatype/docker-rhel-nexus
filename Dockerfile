@@ -18,7 +18,7 @@ MAINTAINER Sonatype <cloud-ops@sonatype.com>
 # Atomic Labels
 LABEL name="Nexus Repository Manager" \
       vendor="Sonatype" \
-      version="3.0.2-02" \
+      version="3.2.0-01" \
       url="https://sonatype.com" \
       summary="The Nexus Repository Manager server \
           with universal support for popular component formats." \
@@ -42,7 +42,7 @@ ENV JAVA_VERSION_MAJOR=8 \
     JAVA_VERSION_MINOR=102 \
     JAVA_VERSION_BUILD=14
 
-COPY help.md /help.md
+COPY help.1 /
 
 RUN yum install -y --setopt=tsflags=nodocs curl tar && \
     yum clean all && \
@@ -50,16 +50,13 @@ RUN yum install -y --setopt=tsflags=nodocs curl tar && \
         --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
         http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
     yum localinstall -y jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
-    ### help markdown to man conversion
-    yum -y install golang-github-cpuguy83-go-md2man && go-md2man -in help.md -out help.1 && \
-    yum -y remove golang-github-cpuguy83-go-md2man && rm -f help.md && \
     yum clean all && \
     rm jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm
 
 # Install Nexus
 ENV NEXUS_DATA=/nexus-data \
     NEXUS_HOME=/opt/sonatype/nexus \
-    NEXUS_VERSION=3.0.2-02 \
+    NEXUS_VERSION=3.2.0-01 \
     USER_NAME=nexus \
     USER_UID=200
 

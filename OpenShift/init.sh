@@ -57,7 +57,7 @@ echo
 echo "Starting Nexus 3 binary build..."
 echo "=================================="
 echo
-oc start-build -n ${OPENSHIFT_NEXUS_PROJECT} nexus3 --follow
+oc start-build -n ${OPENSHIFT_NEXUS_PROJECT} nexus3 --wait
 
 
 
