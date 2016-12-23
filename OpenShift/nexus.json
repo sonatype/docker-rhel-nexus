@@ -37,7 +37,7 @@
                "type": "Git",
                "git": {
                   "uri": "https://github.com/sonatype/docker-rhel-nexus.git",
-                  "ref": "latest"
+                  "ref": "master"
                }
             },
             "strategy": {
