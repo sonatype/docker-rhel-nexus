@@ -32,7 +32,7 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
           with universal support for popular component formats." \
       io.k8s.display-name="Nexus Repository Manager" \
       io.openshift.expose-services="8081:8081" \
-      io.openshift.tags="Sonatype,Nexus"
+      io.openshift.tags="Sonatype,Nexus,Repository Manager"
 
 # Sonatype Labels
 LABEL com.sonatype.license="Apache License, Version 2.0"
@@ -51,30 +51,32 @@ RUN set -x && \
     yum clean all
 
 # Install Nexus
+ENV SONATYPE_DIR=/opt/sonatype
 ENV NEXUS_DATA=/nexus-data \
-    NEXUS_HOME=/opt/sonatype/nexus \
+    NEXUS_HOME=${SONATYPE_DIR}/nexus \
     NEXUS_VERSION=3.2.0-01 \
+    SONATYPE_WORK=${SONATYPE_DIR}/sonatype-work \
+    NEXUS_CONTEXT='' \
     USER_NAME=nexus \
     USER_UID=200
 
+# Install Nexus and Configure Nexus Runtime Environment
 RUN mkdir -p ${NEXUS_HOME} && \
     curl --fail --silent --location --retry 3 \
       https://download.sonatype.com/nexus/3/nexus-${NEXUS_VERSION}-unix.tar.gz \
       | gunzip \
-      | tar x -C ${NEXUS_HOME} --strip-components=1 nexus-${NEXUS_VERSION}
-
-# Configure Nexus Runtime Environment
-RUN sed \
-    -e "s|karaf.home=.|karaf.home=${NEXUS_HOME}|g" \
-    -e "s|karaf.base=.|karaf.base=${NEXUS_HOME}|g" \
-    -e "s|karaf.etc=etc|karaf.etc=${NEXUS_HOME}/etc|g" \
-    -e "s|java.util.logging.config.file=etc|java.util.logging.config.file=${NEXUS_HOME}/etc|g" \
-    -e "s|karaf.data=data|karaf.data=${NEXUS_DATA}|g" \
-    -e "s|java.io.tmpdir=data/tmp|java.io.tmpdir=${NEXUS_DATA}/tmp|g" \
-    -i ${NEXUS_HOME}/bin/nexus.vmoptions
-
-RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
-            -c "${USER_NAME} application user" ${USER_NAME}
+      | tar x -C ${NEXUS_HOME} --strip-components=1 nexus-${NEXUS_VERSION} && \
+    chown -R root:root ${NEXUS_HOME} && \
+    \
+    sed \
+      -e '/^nexus-context/ s:$:${NEXUS_CONTEXT}:' \
+      -i ${NEXUS_HOME}/etc/nexus-default.properties && \
+    \
+    useradd -l -u ${USER_UID} -r -m -d ${NEXUS_DATA} -s /sbin/no-login \
+            -c "${USER_NAME} application user" ${USER_NAME} && \
+            mkdir -p ${NEXUS_DATA}/etc ${NEXUS_DATA}/log ${NEXUS_DATA}/tmp ${SONATYPE_WORK} && \
+            ln -s ${NEXUS_DATA} ${SONATYPE_WORK}/nexus3 && \
+            chown -R nexus:nexus ${NEXUS_DATA}
 
 VOLUME ${NEXUS_DATA}
 

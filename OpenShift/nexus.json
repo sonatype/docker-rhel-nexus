@@ -214,7 +214,13 @@
                               "readinessProbe": {
                                  "httpGet": {
                                     "path": "/service/metrics/ping",
-                                    "port": 8081
+                                    "port": 8081,
+                                    "httpHeaders": [
+                                       {
+                                          "name": "Authorization",
+                                          "value": "Basic YWRtaW46YWRtaW4xMjM="
+                                       }
+                                    ]
                                  },
                                  "initialDelaySeconds": 60,
                                  "timeoutSeconds": 300
