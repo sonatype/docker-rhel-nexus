@@ -2,14 +2,14 @@
    "kind": "List",
    "apiVersion": "v1",
    "metadata": {
-      "name": "nexus3"
+      "name": "nexus"
    },
    "items": [
       {
          "kind": "BuildConfig",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus3"
+            "name": "nexus"
          },
          "spec": {
             "triggers": [
@@ -37,7 +37,7 @@
                "type": "Git",
                "git": {
                   "uri": "https://github.com/sonatype/docker-rhel-nexus.git",
-                  "ref": "master"
+                  "ref": "latest"
                }
             },
             "strategy": {
@@ -52,7 +52,7 @@
             "output": {
                "to": {
                   "kind": "ImageStreamTag",
-                  "name": "nexus3:latest"
+                  "name": "nexus:latest"
                }
             },
             "resources": {}
@@ -72,7 +72,7 @@
          "kind": "ImageStream",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus3"
+            "name": "nexus"
          },
          "spec": {
             "dockerImageRepository": "",
@@ -87,22 +87,22 @@
          "kind": "Template",
          "apiVersion": "v1",
          "metadata": {
-            "name": "nexus3",
+            "name": "nexus",
             "annotations": {
-               "description": "Nexus Repository Manager OSS",
-               "tags": "repository-managers,nexus3"
+               "description": "Nexus Repository Manager 3",
+               "tags": "repository-manager,nexus3,nexus,sonatype"
             }
          },
          "labels": {
-            "application": "nexus3",
-            "createdBy": "template-nexus3"
+            "application": "nexus",
+            "createdBy": "template-nexus"
          },
          "parameters": [
             {
                "description": "The name for the application. The service will be named like the application.",
                "displayName": "Application name.",
                "name": "APPLICATION_NAME",
-               "value": "nexus3"
+               "value": "nexus"
             },
             {
                "description": "Custom hostname for service routes.  Leave blank for default hostname, e.g.: <application-name>.<project>.<default-domain-suffix>",
@@ -160,7 +160,7 @@
                            ],
                            "from": {
                               "kind": "ImageStreamTag",
-                              "name": "${APPLICATION_NAME}:latest"
+                              "name": "nexus:latest"
                            }
                         }
                      },
@@ -170,7 +170,7 @@
                   ],
                   "replicas": 1,
                   "selector": {
-                     "deploymentconfig": "${APPLICATION_NAME}"
+                     "name": "${APPLICATION_NAME}"
                   },
                   "template": {
                      "metadata": {
@@ -181,7 +181,7 @@
                      "spec": {
                         "volumes": [
                            {
-                              "name": "${APPLICATION_NAME}-data",
+                              "name": "nexus-data",
                               "persistentVolumeClaim": {
                                  "claimName": "${APPLICATION_NAME}"
                               }
@@ -190,7 +190,7 @@
                         "containers": [
                            {
                               "name": "${APPLICATION_NAME}",
-                              "image": "${APPLICATION_NAME}",
+                              "image": "nexus",
                               "ports": [
                                  {
                                     "name": "web",
@@ -200,8 +200,8 @@
                               ],
                               "volumeMounts": [
                                  {
-                                    "name": "${APPLICATION_NAME}-data",
-                                    "mountPath": "/sonatype-work"
+                                    "name": "nexus-data",
+                                    "mountPath": "/nexus-data"
                                  }
                               ],
                               "resources": {},
@@ -214,7 +214,13 @@
                               "readinessProbe": {
                                  "httpGet": {
                                     "path": "/service/metrics/ping",
-                                    "port": 8081
+                                    "port": 8081,
+                                    "httpHeaders": [
+                                       {
+                                          "name": "Authorization",
+                                          "value": "Basic YWRtaW46YWRtaW4xMjM="
+                                       }
+                                    ]
                                  },
                                  "initialDelaySeconds": 60,
                                  "timeoutSeconds": 300

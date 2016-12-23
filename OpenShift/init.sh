@@ -30,7 +30,7 @@ echo "=================================="
 echo
 oc login -u ${OPENSHIFT_CLI_USER} -p ${OPENSHIFT_CLI_PASSWORD}
 
-# Create CI Project
+# Create Nexus Project
 echo
 echo "Creating new Nexus Project (${OPENSHIFT_NEXUS_PROJECT})..."
 echo "=================================="
@@ -41,30 +41,28 @@ echo
 echo "Configuring project permissions..."
 echo "=================================="
 echo
-# Grant Default CI Account Edit Access to All Projects and OpenShift Project
+# Grant Default Nexus Account Edit Access to All Projects and OpenShift Project
 oc policy add-role-to-user edit system:serviceaccount:${OPENSHIFT_NEXUS_PROJECT}:default -n ${OPENSHIFT_NEXUS_PROJECT}
+# Use anyuid SCC to allow Nexus to run as UID 200 
+oc adm policy add-scc-to-group anyuid system:serviceaccounts:${OPENSHIFT_NEXUS_PROJECT}
 
-# Process Nexus Template
 echo
-echo "Processing Nexus 3 Template..."
+echo "Processing Nexus Template..."
 echo "=================================="
 echo
-oc create -f "${SCRIPT_BASE_DIR}/nexus3.json" -n ${OPENSHIFT_NEXUS_PROJECT}
-
-sleep 10
+oc create -f "${SCRIPT_BASE_DIR}/nexus.json" -n ${OPENSHIFT_NEXUS_PROJECT}
 
 echo
-echo "Starting Nexus 3 binary build..."
+echo "Starting Nexus binary build..."
 echo "=================================="
 echo
-oc start-build -n ${OPENSHIFT_NEXUS_PROJECT} nexus3 --follow
+oc start-build -n ${OPENSHIFT_NEXUS_PROJECT} nexus --wait
 
-
-
-sleep 10
-
-# Go back to CI project
-oc project ${OPENSHIFT_NEXUS_PROJECT}
+echo
+echo "Create Nexus Application..."
+echo "=================================="
+echo
+oc new-app --template="nexus/nexus"
 
 echo
 echo "=================================="

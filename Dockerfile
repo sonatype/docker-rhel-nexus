@@ -18,7 +18,7 @@ MAINTAINER Sonatype <cloud-ops@sonatype.com>
 # Atomic Labels
 LABEL name="Nexus Repository Manager" \
       vendor="Sonatype" \
-      version="3.0.2-02" \
+      version="3.2.0-01" \
       url="https://sonatype.com" \
       summary="The Nexus Repository Manager server \
           with universal support for popular component formats." \
@@ -42,7 +42,7 @@ ENV JAVA_VERSION_MAJOR=8 \
     JAVA_VERSION_MINOR=102 \
     JAVA_VERSION_BUILD=14
 
-COPY help.md /help.md
+COPY help.1 /
 
 RUN yum install -y --setopt=tsflags=nodocs curl tar && \
     yum clean all && \
@@ -50,37 +50,36 @@ RUN yum install -y --setopt=tsflags=nodocs curl tar && \
         --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
         http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
     yum localinstall -y jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm && \
-    ### help markdown to man conversion
-    yum -y install golang-github-cpuguy83-go-md2man && go-md2man -in help.md -out help.1 && \
-    yum -y remove golang-github-cpuguy83-go-md2man && rm -f help.md && \
     yum clean all && \
     rm jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm
 
 # Install Nexus
+ENV SONATYPE_DIR=/opt/sonatype
 ENV NEXUS_DATA=/nexus-data \
-    NEXUS_HOME=/opt/sonatype/nexus \
-    NEXUS_VERSION=3.0.2-02 \
+    NEXUS_HOME=${SONATYPE_DIR}/nexus \
+    NEXUS_VERSION=3.2.0-01 \
+    SONATYPE_WORK=${SONATYPE_DIR}/sonatype-work \
+    NEXUS_CONTEXT='' \
     USER_NAME=nexus \
     USER_UID=200
 
+# Install Nexus and Configure Nexus Runtime Environment
 RUN mkdir -p ${NEXUS_HOME} && \
     curl --fail --silent --location --retry 3 \
       https://download.sonatype.com/nexus/3/nexus-${NEXUS_VERSION}-unix.tar.gz \
       | gunzip \
-      | tar x -C ${NEXUS_HOME} --strip-components=1 nexus-${NEXUS_VERSION}
-
-# Configure Nexus Runtime Environment
-RUN sed \
-    -e "s|karaf.home=.|karaf.home=${NEXUS_HOME}|g" \
-    -e "s|karaf.base=.|karaf.base=${NEXUS_HOME}|g" \
-    -e "s|karaf.etc=etc|karaf.etc=${NEXUS_HOME}/etc|g" \
-    -e "s|java.util.logging.config.file=etc|java.util.logging.config.file=${NEXUS_HOME}/etc|g" \
-    -e "s|karaf.data=data|karaf.data=${NEXUS_DATA}|g" \
-    -e "s|java.io.tmpdir=data/tmp|java.io.tmpdir=${NEXUS_DATA}/tmp|g" \
-    -i ${NEXUS_HOME}/bin/nexus.vmoptions
-
-RUN useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
-            -c "${USER_NAME} application user" ${USER_NAME}
+      | tar x -C ${NEXUS_HOME} --strip-components=1 nexus-${NEXUS_VERSION} && \
+    chown -R root:root ${NEXUS_HOME} && \
+    \
+    sed \
+      -e '/^nexus-context/ s:$:${NEXUS_CONTEXT}:' \
+      -i ${NEXUS_HOME}/etc/nexus-default.properties && \
+    \
+    useradd -l -u ${USER_UID} -r -m -d ${NEXUS_DATA} -s /sbin/no-login \
+            -c "${USER_NAME} application user" ${USER_NAME} && \
+            mkdir -p ${NEXUS_DATA}/etc ${NEXUS_DATA}/log ${NEXUS_DATA}/tmp ${SONATYPE_WORK} && \
+            ln -s ${NEXUS_DATA} ${SONATYPE_WORK}/nexus3 && \
+            chown -R nexus:nexus ${NEXUS_DATA}
 
 VOLUME ${NEXUS_DATA}
 
