@@ -118,12 +118,3 @@ In the nexus project, click `Add to Project` and search for Nexus. Click
 create and configure to create a Nexus service. Wait until the service has
 been created and the deployment is successful. A Nexus instance should now
 be available on the configured service.
-
-## Known issues
-Nexus is build on docker to be run by user nexus (id=200). For running with
-that user, the anyuid (or another that allows to run on 200) should be used.
-For example, you can use:
-
-oc adm policy add-scc-to-group anyuid system:serviceaccounts:myproject
-
-with admin priviledges to set up the anyuid scc in "myproject"
