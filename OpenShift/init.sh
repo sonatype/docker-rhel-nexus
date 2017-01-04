@@ -41,8 +41,6 @@ echo
 echo "Configuring project permissions..."
 echo "=================================="
 echo
-# Grant Default Nexus Account Edit Access to All Projects and OpenShift Project
-oc policy add-role-to-user edit system:serviceaccount:${OPENSHIFT_NEXUS_PROJECT}:default -n ${OPENSHIFT_NEXUS_PROJECT}
 # Use anyuid SCC to allow Nexus to run as UID 200 
 oc adm policy add-scc-to-group anyuid system:serviceaccounts:${OPENSHIFT_NEXUS_PROJECT}
 
