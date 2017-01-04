@@ -50,7 +50,7 @@ echo
 echo "Processing Nexus Template..."
 echo "=================================="
 echo
-oc create -f "${SCRIPT_BASE_DIR}/nexus.json" -n ${OPENSHIFT_NEXUS_PROJECT}
+oc create -f "${SCRIPT_BASE_DIR}/nexus-rhel.json" -n ${OPENSHIFT_NEXUS_PROJECT}
 
 echo
 echo "Starting Nexus binary build..."

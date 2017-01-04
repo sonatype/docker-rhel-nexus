@@ -43,9 +43,10 @@
             "strategy": {
                "type": "Docker",
                "dockerStrategy": {
+                  "dockerfilePath": "Dockerfile",
                   "from": {
                      "kind": "DockerImage",
-                     "name": "registry.access.redhat.com/rhel7/rhel"
+                     "name": "centos:centos7"
                   }
                }
             },
@@ -62,10 +63,10 @@
          "kind": "ImageStream",
          "apiVersion": "v1",
          "metadata": {
-            "name": "rhel7"
+            "name": "centos"
          },
          "spec": {
-            "dockerImageRepository": "registry.access.redhat.com/rhel7/rhel"
+            "dockerImageRepository": "centos:centos7"
          }
       },
       {
