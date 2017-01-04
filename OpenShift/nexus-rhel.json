@@ -194,7 +194,7 @@
                               "image": "nexus",
                               "ports": [
                                  {
-                                    "name": "web",
+                                    "name": "web-port",
                                     "containerPort": 8081,
                                     "protocol": "TCP"
                                  }
@@ -215,7 +215,7 @@
                               "readinessProbe": {
                                  "httpGet": {
                                     "path": "/service/metrics/ping",
-                                    "port": 8081,
+                                    "port": "web-port",
                                     "httpHeaders": [
                                        {
                                           "name": "Authorization",
@@ -224,7 +224,21 @@
                                     ]
                                  },
                                  "initialDelaySeconds": 60,
-                                 "timeoutSeconds": 300
+                                 "timeoutSeconds": 1
+                              },
+                              "livenessProbe": {
+                                "httpGet": {
+                                    "path": "/service/metrics/ping",
+                                    "port": "web-port",
+                                    "httpHeaders": [
+                                       {
+                                          "name": "Authorization",
+                                          "value": "Basic YWRtaW46YWRtaW4xMjM="
+                                       }
+                                    ]
+                                 },
+                                 "initialDelaySeconds": 60,
+                                 "timeoutSeconds": 1
                               }
                            }
                         ],
