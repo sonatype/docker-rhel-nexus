@@ -1,11 +1,11 @@
 sudo: required
+dist: trusty
 services:
  - docker
 addons:
   apt:
     packages:
     - nodejs
-    - npm
 install:
   - npm install -g dockerfile_lint
 before_script:
