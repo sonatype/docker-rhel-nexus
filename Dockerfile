@@ -19,6 +19,7 @@ MAINTAINER Sonatype <cloud-ops@sonatype.com>
 LABEL name="Nexus Repository Manager" \
       vendor="Sonatype" \
       version="3.2.1-01" \
+      release="3.2.1" \
       url="https://sonatype.com" \
       summary="The Nexus Repository Manager server \
           with universal support for popular component formats." \
