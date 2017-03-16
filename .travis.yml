@@ -19,4 +19,5 @@ before_script:
   - dockerfile_lint -f ./$VERSION/$VARIANT/Dockerfile
 
 script:
-  - docker build --rm=true --tag=sonatype/nexus3 -f ./$VERSION/$VARIANT/Dockerfile .
+  - cd ./$VERSION/$VARIANT
+  - docker build --rm=true --tag=sonatype/nexus3 .
