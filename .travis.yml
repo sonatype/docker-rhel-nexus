@@ -1,14 +1,22 @@
 sudo: required
 dist: trusty
+
 services:
  - docker
+
 addons:
   apt:
     packages:
     - nodejs
+
+env:
+  - VERSION=3.2.1 VARIANT=centos
+
 install:
   - npm install -g dockerfile_lint
+
 before_script:
-  - dockerfile_lint -f Dockerfile
+  - dockerfile_lint -f ./{$VERSION}/{$VARIANT}/Dockerfile
+
 script:
-  - docker build --rm=true --tag=sonatype/nexus3 .
+  - docker build --rm=true --tag=sonatype/nexus3 -f ./{$VERSION}/{$VARIANT}/Dockerfile .
