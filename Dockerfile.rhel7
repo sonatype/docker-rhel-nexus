@@ -46,7 +46,7 @@ RUN set -x && \
     yum-config-manager --disable \* && \
     yum-config-manager --enable rhel-7-server-rpms && \
     yum-config-manager --enable rhel-7-server-thirdparty-oracle-java-rpms && \
-    yum -y update-minimal --security --sec-severity=Important --sec-severity=Critical --setopt=tsflags=nodocs && \
+    yum -y update --setopt=tsflags=nodocs && \
     yum -y install --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
     yum-config-manager --enable rhel-7-server-optional-rpms && \
     yum clean all
