@@ -82,6 +82,14 @@ RUN mkdir -p ${NEXUS_HOME} && \
             ln -s ${NEXUS_DATA} ${SONATYPE_WORK}/nexus3 && \
             chown -R nexus:nexus ${NEXUS_DATA}
 
+COPY scripts/ /usr/local/bin/
+
+RUN chmod 775 /usr/local/bin/fix-permissions && \
+    /usr/local/bin/fix-permissions ${NEXUS_HOME} && \
+    /usr/local/bin/fix-permissions ${NEXUS_DATA} && \
+    chown -R ${USER_NAME}:0 ${NEXUS_HOME} && \
+    chown -R ${USER_NAME}:0 ${NEXUS_DATA}
+
 VOLUME ${NEXUS_DATA}
 
 # Supply non variable to USER command ${USER_NAME}
