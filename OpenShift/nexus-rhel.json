@@ -38,12 +38,13 @@
                "git": {
                   "uri": "https://github.com/sonatype/docker-rhel-nexus.git",
                   "ref": "master"
-               }
+               },
+               "contextDir": "3.2.1/rhel"
             },
             "strategy": {
                "type": "Docker",
                "dockerStrategy": {
-                  "dockerfilePath": "Dockerfile.rhel7",
+                  "dockerfilePath": "Dockerfile",
                   "from": {
                      "kind": "DockerImage",
                      "name": "registry.access.redhat.com/rhel7/rhel"
