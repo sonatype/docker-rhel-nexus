@@ -4,9 +4,6 @@ Dockerfile for Sonatype Nexus Repository Manager 3 with OpenJDK and
 Red Hat Enterprise Linux 7. Made to run on the Red Hat OpenShift Container
 Platform.
 
-Looking for Nexus 2? Checkout the [Nexus 2 branch](https://github.com/sonatype/docker-rhel-nexus/tree/Nexus2). |
---- |
-
 * [Docker](#docker)
   * [Notes](#notes)
   * [Persistent Data](#persistent-data)
