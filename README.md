@@ -1,5 +1,8 @@
 # sonatype/docker-rhel-nexus [![Build Status](https://travis-ci.org/sonatype/docker-rhel-nexus.svg?branch=master)](https://travis-ci.org/sonatype/docker-rhel-nexus)
 
+-**Breaking Change** In order to support an authoratative history of Dockerfiles, Dockerfiles are now stored by version and flavor. OpenShift templates have been updated to support this change (c.f. bd3781a). Thanks to @itewk for the heads up. |
+ ---- |
+
 Dockerfile for Sonatype Nexus Repository Manager 3 with OpenJDK and
 Red Hat Enterprise Linux 7. Made to run on the Red Hat OpenShift Container
 Platform.
