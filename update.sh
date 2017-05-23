@@ -31,7 +31,7 @@ for variant in rhel; do
     mkdir -p $nexusVersionShort/$variant
   fi
   sed -e "$sedStr" "Dockerfile-$variant.template" > $nexusVersionShort/$variant/Dockerfile
-  md2man-roff help.md > $nexusVersionShort/$variant/help1
+  md2man-roff help.md > $nexusVersionShort/$variant/help.1
 done
 
 travisEnv=
@@ -40,7 +40,7 @@ for variant in centos; do
     mkdir -p $nexusVersionShort/$variant
   fi
   sed -e "$sedStr" "Dockerfile-$variant.template" > $nexusVersionShort/$variant/Dockerfile
-  md2man-roff help.md > $nexusVersionShort/$variant/help1
+  md2man-roff help.md > $nexusVersionShort/$variant/help.1
   travisEnv='\n  - VERSION='"$nexusVersionShort VARIANT=$variant$travisEnv"
 done
 

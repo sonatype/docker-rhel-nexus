@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM       centos:centos7
+FROM       registry.access.redhat.com/rhel7/rhel
 MAINTAINER Sonatype <cloud-ops@sonatype.com>
 
 # Atomic Labels
 LABEL name="Nexus Repository Manager" \
       vendor="Sonatype" \
-      version="3.2.1-01" \
-      release="3.2.1" \
+      version="3.3.1-01" \
+      release="3.3.1" \
       url="https://sonatype.com" \
       summary="The Nexus Repository Manager server \
           with universal support for popular component formats." \
@@ -33,36 +33,29 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
           with universal support for popular component formats." \
       io.k8s.display-name="Nexus Repository Manager" \
       io.openshift.expose-services="8081:8081" \
-      io.openshift.tags="Sonatype,Nexus"
+      io.openshift.tags="Sonatype,Nexus,Repository Manager"
 
 # Sonatype Labels
 LABEL com.sonatype.license="Apache License, Version 2.0"
 
-# Install Runtime Environment
-ENV JAVA_VERSION_MAJOR=8 \
-    JAVA_VERSION_MINOR=131 \
-    JAVA_VERSION_BUILD=11 \
-    JAVA_DOWNLOAD_HASH=d54c1d3a095b4ff2b6607d096fa80163
-
-ENV JAVA_URL=http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_DOWNLOAD_HASH}/ \
-    JAVA_RPM=jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm
-
 COPY help.1 /
 
-RUN yum install -y --setopt=tsflags=nodocs curl tar && \
+# Install Runtime Environment
+RUN set -x && \
     yum clean all && \
-    curl --remote-name --fail --silent --location --retry 3 \
-        --header "Cookie: oraclelicense=accept-securebackup-cookie; " \
-        ${JAVA_URL}${JAVA_RPM} && \
-    yum localinstall -y ${JAVA_RPM} && \
-    yum clean all && \
-    rm ${JAVA_RPM}
+    yum-config-manager --disable \* && \
+    yum-config-manager --enable rhel-7-server-rpms && \
+    yum-config-manager --enable rhel-7-server-thirdparty-oracle-java-rpms && \
+    yum -y update --setopt=tsflags=nodocs && \
+    yum -y install --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
+    yum-config-manager --enable rhel-7-server-optional-rpms && \
+    yum clean all
 
 # Install Nexus
 ENV SONATYPE_DIR=/opt/sonatype
 ENV NEXUS_DATA=/nexus-data \
     NEXUS_HOME=${SONATYPE_DIR}/nexus \
-    NEXUS_VERSION=3.2.1-01 \
+    NEXUS_VERSION=3.3.1-01 \
     SONATYPE_WORK=${SONATYPE_DIR}/sonatype-work \
     NEXUS_CONTEXT='' \
     USER_NAME=nexus \
