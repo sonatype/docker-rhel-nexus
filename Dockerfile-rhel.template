@@ -38,17 +38,16 @@ LABEL io.k8s.description="The Nexus Repository Manager server \
 # Sonatype Labels
 LABEL com.sonatype.license="Apache License, Version 2.0"
 
-COPY help.1 /
+COPY help.1 uid_entrypoint /
 
 # Install Runtime Environment
 RUN set -x && \
     yum clean all && \
-    yum-config-manager --disable \* && \
-    yum-config-manager --enable rhel-7-server-rpms && \
-    yum-config-manager --enable rhel-7-server-thirdparty-oracle-java-rpms && \
-    yum -y update --setopt=tsflags=nodocs && \
-    yum -y install --setopt=tsflags=nodocs tar java-1.8.0-oracle-devel && \
-    yum-config-manager --enable rhel-7-server-optional-rpms && \
+    REPOLIST=rhel-7-server-rpms,rhel-7-server-optional-rpms,rhel-7-server-thirdparty-oracle-java-rpms \
+    INSTALL_PKGS="tar java-1.8.0-oracle-devel" && \
+    yum -y update-minimal --disablerepo "*" --enablerepo ${REPOLIST} --setopt=tsflags=nodocs \
+      --security --sec-severity=Important --sec-severity=Critical && \
+    yum -y install --disablerepo "*" --enablerepo ${REPOLIST} --setopt=tsflags=nodocs ${INSTALL_PKGS} && \
     yum clean all
 
 # Install Nexus
@@ -73,22 +72,28 @@ RUN mkdir -p ${NEXUS_HOME} && \
       -e '/^nexus-context/ s:$:${NEXUS_CONTEXT}:' \
       -i ${NEXUS_HOME}/etc/nexus-default.properties && \
     \
-    useradd -l -u ${USER_UID} -r -m -d ${NEXUS_DATA} -s /sbin/no-login \
+    useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
             -c "${USER_NAME} application user" ${USER_NAME} && \
             mkdir -p ${NEXUS_DATA}/etc ${NEXUS_DATA}/log ${NEXUS_DATA}/tmp ${SONATYPE_WORK} && \
             ln -s ${NEXUS_DATA} ${SONATYPE_WORK}/nexus3 && \
-            chown -R nexus:nexus ${NEXUS_DATA}
+            chown -R ${USER_NAME}:0 ${NEXUS_DATA} && \
+            chmod -R g+rw ${NEXUS_DATA} /etc/passwd && \
+            chmod ug+x /uid_entrypoint && \
+            find ${NEXUS_DATA} -type d -exec chmod g+x {} +
 
 VOLUME ${NEXUS_DATA}
 
+# arbitrary uid recognition at runtime - for OpenShift deployments
+RUN sed "s@${USER_NAME}:x:${USER_UID}:@${USER_NAME}:x:\${USER_ID}:@g" /etc/passwd > /etc/passwd.template
+
 # Supply non variable to USER command ${USER_NAME}
-USER nexus
-# Supply non variable to WORKDIR command ${NEXUS_HOME}
-WORKDIR /opt/sonatype/nexus
+USER 200
+WORKDIR ${NEXUS_HOME}
 
 ENV JAVA_MAX_MEM=1200m \
     JAVA_MIN_MEM=1200m
 
 EXPOSE 8081
 
+ENTRYPOINT [ "/uid_entrypoint" ]
 CMD ["bin/nexus", "run"]

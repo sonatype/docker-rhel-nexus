@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM       centos:centos7
+FROM       docker.io/centos:7
 MAINTAINER Sonatype <cloud-ops@sonatype.com>
 
 # Atomic Labels
@@ -47,7 +47,7 @@ ENV JAVA_VERSION_MAJOR=8 \
 ENV JAVA_URL=http://download.oracle.com/otn-pub/java/jdk/${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-b${JAVA_VERSION_BUILD}/${JAVA_DOWNLOAD_HASH}/ \
     JAVA_RPM=jdk-${JAVA_VERSION_MAJOR}u${JAVA_VERSION_MINOR}-linux-x64.rpm
 
-COPY help.1 /
+COPY help.1 uid_entrypoint /
 
 RUN yum install -y --setopt=tsflags=nodocs curl tar && \
     yum clean all && \
@@ -80,22 +80,28 @@ RUN mkdir -p ${NEXUS_HOME} && \
       -e '/^nexus-context/ s:$:${NEXUS_CONTEXT}:' \
       -i ${NEXUS_HOME}/etc/nexus-default.properties && \
     \
-    useradd -l -u ${USER_UID} -r -m -d ${NEXUS_DATA} -s /sbin/no-login \
+    useradd -l -u ${USER_UID} -r -g 0 -m -d ${NEXUS_DATA} -s /sbin/no-login \
             -c "${USER_NAME} application user" ${USER_NAME} && \
             mkdir -p ${NEXUS_DATA}/etc ${NEXUS_DATA}/log ${NEXUS_DATA}/tmp ${SONATYPE_WORK} && \
             ln -s ${NEXUS_DATA} ${SONATYPE_WORK}/nexus3 && \
-            chown -R nexus:nexus ${NEXUS_DATA}
+            chown -R ${USER_NAME}:0 ${NEXUS_DATA} && \
+            chmod -R g+rw ${NEXUS_DATA} /etc/passwd && \
+            chmod ug+x /uid_entrypoint && \
+            find ${NEXUS_DATA} -type d -exec chmod g+x {} +
 
 VOLUME ${NEXUS_DATA}
 
+# arbitrary uid recognition at runtime - for OpenShift deployments
+RUN sed "s@${USER_NAME}:x:${USER_UID}:@${USER_NAME}:x:\${USER_ID}:@g" /etc/passwd > /etc/passwd.template
+
 # Supply non variable to USER command ${USER_NAME}
-USER nexus
-# Supply non variable to WORKDIR command ${NEXUS_HOME}
-WORKDIR /opt/sonatype/nexus
+USER 200
+WORKDIR ${NEXUS_HOME}
 
 ENV JAVA_MAX_MEM=1200m \
     JAVA_MIN_MEM=1200m
 
 EXPOSE 8081
 
+ENTRYPOINT [ "/uid_entrypoint" ]
 CMD ["bin/nexus", "run"]

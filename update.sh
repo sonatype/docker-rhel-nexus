@@ -32,6 +32,7 @@ for variant in rhel; do
   fi
   sed -e "$sedStr" "Dockerfile-$variant.template" > $nexusVersionShort/$variant/Dockerfile
   md2man-roff help.md > $nexusVersionShort/$variant/help.1
+  cp uid_entrypoint $nexusVersionShort/$variant/uid_entrypoint
 done
 
 travisEnv=
@@ -41,8 +42,13 @@ for variant in centos; do
   fi
   sed -e "$sedStr" "Dockerfile-$variant.template" > $nexusVersionShort/$variant/Dockerfile
   md2man-roff help.md > $nexusVersionShort/$variant/help.1
+  cp uid_entrypoint $nexusVersionShort/$variant/uid_entrypoint
   travisEnv='\n  - VERSION='"$nexusVersionShort VARIANT=$variant$travisEnv"
 done
 
 travis="$(awk -v 'RS=\n' '$1 == "env:" { $0 = "env:'"$travisEnv"'" } { printf "%s%s", $0, RS }' .travis.yml)"
 echo "$travis" > .travis.yml
+osCentos="$(sed -e 's#"contextDir": ".*/centos"#"contextDir": "'"${nexusVersionShort}"'/centos"#g' ./OpenShift/nexus-centos.json)"
+echo "$osCentos" > ./OpenShift/nexus-centos.json
+osRhel="$(sed -e 's#"contextDir": ".*/rhel"#"contextDir": "'"${nexusVersionShort}"'/rhel"#g' ./OpenShift/nexus-rhel.json)"
+echo "$osRhel" > ./OpenShift/nexus-rhel.json
