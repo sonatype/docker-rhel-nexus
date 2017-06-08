@@ -202,7 +202,7 @@
                               "readinessProbe": {
                                  "httpGet": {
                                     "path": "/service/metrics/ping",
-                                    "port": 8081,
+                                    "port": "web-port",
                                     "httpHeaders": [
                                        {
                                           "name": "Authorization",
@@ -216,7 +216,7 @@
                               "livenessProbe": {
                                 "httpGet": {
                                     "path": "/service/metrics/ping",
-                                    "port": 8081,
+                                    "port": "web-port",
                                     "httpHeaders": [
                                        {
                                           "name": "Authorization",

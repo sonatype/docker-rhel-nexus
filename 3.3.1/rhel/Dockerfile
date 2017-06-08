@@ -86,7 +86,7 @@ VOLUME ${NEXUS_DATA}
 ### arbitrary uid recognition at runtime - for OpenShift deployments
 RUN sed "s@${USER_NAME}:x:${USER_UID}:@${USER_NAME}:x:\${USER_ID}:@g" /etc/passwd > /etc/passwd.template
 
-USER ${USER_UID}
+USER 200
 WORKDIR ${NEXUS_HOME}
 
 ENV JAVA_MAX_MEM=1200m \
