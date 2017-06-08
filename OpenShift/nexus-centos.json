@@ -39,16 +39,12 @@
                   "uri": "https://github.com/sonatype/docker-rhel-nexus.git",
                   "ref": "master"
                },
-               "contextDir": "3.2.1/centos"
+               "contextDir": "3.3.1/centos"
             },
             "strategy": {
                "type": "Docker",
                "dockerStrategy": {
-                  "dockerfilePath": "Dockerfile",
-                  "from": {
-                     "kind": "DockerImage",
-                     "name": "centos:centos7"
-                  }
+                  "dockerfilePath": "Dockerfile"
                }
             },
             "output": {
@@ -58,16 +54,6 @@
                }
             },
             "resources": {}
-         }
-      },
-      {
-         "kind": "ImageStream",
-         "apiVersion": "v1",
-         "metadata": {
-            "name": "centos"
-         },
-         "spec": {
-            "dockerImageRepository": "centos:centos7"
          }
       },
       {
@@ -224,8 +210,8 @@
                                        }
                                     ]
                                  },
-                                 "initialDelaySeconds": 60,
-                                 "timeoutSeconds": 1
+                                 "initialDelaySeconds": 120,
+                                 "timeoutSeconds": 5
                               },
                               "livenessProbe": {
                                 "httpGet": {
@@ -238,8 +224,8 @@
                                        }
                                     ]
                                  },
-                                 "initialDelaySeconds": 60,
-                                 "timeoutSeconds": 1
+                                 "initialDelaySeconds": 120,
+                                 "timeoutSeconds": 5
                               }
                            }
                         ],

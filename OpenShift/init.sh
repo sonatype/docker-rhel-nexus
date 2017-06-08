@@ -38,13 +38,6 @@ echo
 oc new-project ${OPENSHIFT_NEXUS_PROJECT}
 
 echo
-echo "Configuring project permissions..."
-echo "=================================="
-echo
-# Use anyuid SCC to allow Nexus to run as UID 200 
-oc adm policy add-scc-to-group anyuid system:serviceaccounts:${OPENSHIFT_NEXUS_PROJECT}
-
-echo
 echo "Processing Nexus Template..."
 echo "=================================="
 echo
