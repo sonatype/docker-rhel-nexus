@@ -83,13 +83,12 @@ RUN mkdir -p ${NEXUS_HOME} && \
 
 VOLUME ${NEXUS_DATA}
 
-### arbitrary uid recognition at runtime - for OpenShift deployments
+# arbitrary uid recognition at runtime - for OpenShift deployments
 RUN sed "s@${USER_NAME}:x:${USER_UID}:@${USER_NAME}:x:\${USER_ID}:@g" /etc/passwd > /etc/passwd.template
 
 # Supply non variable to USER command ${USER_NAME}
 USER 200
-# Supply non variable to WORKDIR command ${NEXUS_HOME}
-WORKDIR /opt/sonatype/nexus
+WORKDIR ${NEXUS_HOME}
 
 ENV JAVA_MAX_MEM=1200m \
     JAVA_MIN_MEM=1200m
