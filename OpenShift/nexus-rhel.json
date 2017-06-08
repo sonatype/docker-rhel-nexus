@@ -44,11 +44,7 @@
             "strategy": {
                "type": "Docker",
                "dockerStrategy": {
-                  "dockerfilePath": "Dockerfile",
-                  "from": {
-                     "kind": "DockerImage",
-                     "name": "registry.access.redhat.com/rhel7/rhel"
-                  }
+                  "dockerfilePath": "Dockerfile"
                }
             },
             "output": {
@@ -58,16 +54,6 @@
                }
             },
             "resources": {}
-         }
-      },
-      {
-         "kind": "ImageStream",
-         "apiVersion": "v1",
-         "metadata": {
-            "name": "rhel7"
-         },
-         "spec": {
-            "dockerImageRepository": "registry.access.redhat.com/rhel7/rhel"
          }
       },
       {
@@ -216,7 +202,7 @@
                               "readinessProbe": {
                                  "httpGet": {
                                     "path": "/service/metrics/ping",
-                                    "port": "web-port",
+                                    "port": 8081,
                                     "httpHeaders": [
                                        {
                                           "name": "Authorization",
@@ -230,7 +216,7 @@
                               "livenessProbe": {
                                 "httpGet": {
                                     "path": "/service/metrics/ping",
-                                    "port": "web-port",
+                                    "port": 8081,
                                     "httpHeaders": [
                                        {
                                           "name": "Authorization",
