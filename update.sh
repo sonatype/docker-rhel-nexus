@@ -33,6 +33,7 @@ for variant in rhel; do
   sed -e "$sedStr" "Dockerfile-$variant.template" > $nexusVersionShort/$variant/Dockerfile
   md2man-roff help.md > $nexusVersionShort/$variant/help.1
   cp uid_entrypoint $nexusVersionShort/$variant/uid_entrypoint
+  cp -r licenses $nexusVersionShort/$variant
 done
 
 travisEnv=
@@ -43,6 +44,7 @@ for variant in centos; do
   sed -e "$sedStr" "Dockerfile-$variant.template" > $nexusVersionShort/$variant/Dockerfile
   md2man-roff help.md > $nexusVersionShort/$variant/help.1
   cp uid_entrypoint $nexusVersionShort/$variant/uid_entrypoint
+  cp -r licenses $nexusVersionShort/$variant
   travisEnv='\n  - VERSION='"$nexusVersionShort VARIANT=$variant$travisEnv"
 done
 

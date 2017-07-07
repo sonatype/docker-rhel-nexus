@@ -40,6 +40,8 @@ LABEL com.sonatype.license="Apache License, Version 2.0"
 
 COPY help.1 uid_entrypoint /
 
+COPY licenses /licenses
+
 # Install Runtime Environment
 RUN set -x && \
     yum clean all && \
