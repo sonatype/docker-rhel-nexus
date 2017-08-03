@@ -18,8 +18,8 @@ MAINTAINER Sonatype <cloud-ops@sonatype.com>
 # Atomic Labels
 LABEL name="Nexus Repository Manager" \
       vendor="Sonatype" \
-      version="%%NEXUS_VERSION%%" \
-      release="%%NEXUS_VERSION_SHORT%%" \
+      version="3.5.0-02" \
+      release="3.5.0" \
       url="https://sonatype.com" \
       summary="The Nexus Repository Manager server \
           with universal support for popular component formats." \
@@ -64,7 +64,7 @@ RUN yum install -y --setopt=tsflags=nodocs curl tar && \
 ENV SONATYPE_DIR=/opt/sonatype
 ENV NEXUS_DATA=/nexus-data \
     NEXUS_HOME=${SONATYPE_DIR}/nexus \
-    NEXUS_VERSION=%%NEXUS_VERSION%% \
+    NEXUS_VERSION=3.5.0-02 \
     SONATYPE_WORK=${SONATYPE_DIR}/sonatype-work \
     NEXUS_CONTEXT='' \
     USER_NAME=nexus \
