@@ -39,7 +39,7 @@
                   "uri": "https://github.com/sonatype/docker-rhel-nexus.git",
                   "ref": "master"
                },
-               "contextDir": "3.6.2/centos"
+               "contextDir": "current/centos"
             },
             "strategy": {
                "type": "Docker",

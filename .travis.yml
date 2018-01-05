@@ -10,6 +10,7 @@ addons:
     - nodejs
 
 env:
+  - VERSION=3.7.1 VARIANT=centos
   - VERSION=3.6.2 VARIANT=centos
   - VERSION=3.6.0 VARIANT=centos
   - VERSION=3.5.1 VARIANT=centos
