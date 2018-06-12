@@ -10,9 +10,9 @@ images differ from the default offering is described in [Red Hat Certified Image
 
 ## OpenShift Templates
 
-The OpenShift Templates have been moved to a dedicated GitHub repository for container management reference
+The OpenShift Templates have been moved to a dedicated GitHub repository for deployment reference
 architecture, available at 
-[sonatype-nexus-community/container-management-reference-architecture](https://github.com/sonatype-nexus-community/container-management-reference-architecture/tree/master/OpenShift).
+[sonatype-nexus-community/deployment-reference-architecture](https://github.com/sonatype-nexus-community/deployment-reference-architecture/tree/master/OpenShift).
 
 ## Sunsetting
 
